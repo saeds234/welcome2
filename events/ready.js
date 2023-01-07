@@ -1,26 +1,17 @@
-const client = require("../index");
-const { Collection } = require("discord.js")
-const fs = require("fs")
+const { REST } = require("@discordjs/rest");
+const { Routes } = require("discord-api-types/v10");
+const { TOKEN } = require("../config.json");
 
-client.on("ready", () => {
-console.log(`${client.user.tag} Bot Online!`)
-client.user.setActivity(`Raven #2022`)
+module.exports = async (client) => {
 
-client.commands = new Collection();
-client.aliases = new Collection();
-fs.readdir("./commands/", (err, files) => {
-if (err) console.error(err);
-console.log(`${files.length} Total Command!`);
-files.forEach(f => {
-let props = require(`../commands/${f}`);
-    
-console.log(`${props.help.name} Named Command Online!`);
-    
-client.commands.set(props.help.name, props);
-props.conf.aliases.forEach(alias => {
-client.aliases.set(alias, props.help.name);
-});
-});
-});
+  const rest = new REST({ version: "10" }).setToken(TOKEN);
+  try {
+    await rest.put(Routes.applicationCommands(client.user.id), {
+      body: client.commands,
+    });
+  } catch (error) {
+    console.error(error);
+  }
 
-});
+    console.log(`${client.user.tag} Aktif!`);
+};
